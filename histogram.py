@@ -79,9 +79,10 @@ class Histogram:
         # Convert world coordinates to grid cell index
         start_ix = int((self.robot_x - MIN_X) / GRID_RESOLUTION)
         start_iy = int((self.robot_y - MIN_Y) / GRID_RESOLUTION)
-        
-        # 100% probability at starting position
-        self.data[start_ix, start_iy] = 1.0
+
+        total_cells = self.x_w * self.y_w
+        probability = 1.0 / total_cells
+        self.data = np.full((self.x_w, self.y_w), probability)
         
     def normalize_probability(self):
         self.data = np.array(self.data)
@@ -127,16 +128,13 @@ class Histogram:
         tmp_data = copy.deepcopy(self.data)
         for ix in range(self.x_w):
             for iy in range(self.y_w):
-                self.data[ix][iy] = 0.0001
-        for ix in range(self.x_w):
-            for iy in range(self.y_w):
                 nix = ix + x_shift
                 niy = iy + y_shift
                 if 0 <= nix < self.x_w and 0 <= niy < self.y_w:
                     self.data[nix][niy] = tmp_data[ix][iy]
 
     def histogram_motion_update(self, u):
-        self.dx += DT * np.cos(self.robot_theta) * u[0, 0]
+        self.dx += DT * np.cos(self.robot_theta) * u[0, 0]      
         self.dy += DT * np.sin(self.robot_theta) * u[0, 0]
         
         x_shift = int(self.dx // GRID_RESOLUTION)
@@ -245,5 +243,5 @@ class Histogram:
     
 
 if __name__ == "__main__":
-    ekf = Histogram()
-    ekf.main()
+    hst = Histogram()
+    hst.main()
